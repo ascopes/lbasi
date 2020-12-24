@@ -24,7 +24,7 @@ class Interpreter
   def number
     buff = []
     while @text[@pos] =~ /\d/
-      buff.append @text[@pos]
+      buff.append(@text[@pos])
       @pos += 1
     end
     buff.join.to_i
@@ -32,7 +32,7 @@ class Interpreter
 
   def make_token_advance(type, pos, offset = 1)
     @pos += offset
-    Token.new type, pos
+    Token.new(type, pos)
   end
 
   def next_token
@@ -42,10 +42,10 @@ class Interpreter
     char = @text[@pos]
 
     case char
-    when nil then Token.new :EOF, start_pos
-    when /\d/ then ValueToken.new :NUMBER, start_pos, number
-    when '*' then make_token_advance :MUL, start_pos
-    when '/' then make_token_advance :DIV, start_pos
+    when nil then Token.new(:EOF, start_pos)
+    when /\d/ then ValueToken.new(:NUMBER, start_pos, number)
+    when '*' then make_token_advance(:MUL, start_pos)
+    when '/' then make_token_advance(:DIV, start_pos)
     else raise "Unexpected character '#{char}' found during lexical analysis at ##{start_pos}"
     end
   end
@@ -75,7 +75,7 @@ class Interpreter
 
     result = term
 
-    while %i[MUL DIV].include? @current_token.type
+    while %i[MUL DIV].include?(@current_token.type)
       case @current_token.type
       when :MUL
         eat(:MUL)
