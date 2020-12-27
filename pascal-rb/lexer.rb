@@ -23,6 +23,11 @@ class Lexer
     when '-' then operator_token('-', :MINUS)
     when '*' then operator_token('*', :MUL)
     when '/' then operator_token('/', :DIV)
+    when '%' then operator_token('%', :MOD)
+    when '&' then operator_token('&', :BAND)
+    when '|' then operator_token('|', :BOR)
+    when '^' then operator_token('^', :BXOR)
+    when '~' then operator_token('~', :INVERT)
     when '(' then operator_token('(', :LPAREN)
     when ')' then operator_token(')', :RPAREN)
     else raise "Unexpected symbol '#{@current_char}' in input at #{@position}"

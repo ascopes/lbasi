@@ -17,7 +17,9 @@ class Parser
   end
 
   def parse
-    expr
+    tree = expr
+    eat(:EOF)
+    tree
   end
 
   private def eat(type)
@@ -41,13 +43,35 @@ class Parser
     end
   end
 
-  private def term
-    node = factor
-
-    while %i[MUL DIV].include?(@current_token.type)
+  private def prefix_unary
+    if %i[PLUS MINUS INVERT].include?(@current_token.type)
       op_token = @current_token
       eat(op_token.type)
-      node = BinaryOpNode.new(node, op_token, factor)
+      UnaryOpNode.new(op_token, factor)
+    else
+      factor
+    end
+  end
+
+  private def bitwise
+    node = prefix_unary
+
+    while %i[BAND BOR BXOR].include?(@current_token.type)
+      op_token = @current_token
+      eat(op_token.type)
+      node = BinaryOpNode.new(node, op_token, prefix_unary)
+    end
+
+    node
+  end
+
+  private def term
+    node = bitwise
+
+    while %i[MUL DIV MOD].include?(@current_token.type)
+      op_token = @current_token
+      eat(op_token.type)
+      node = BinaryOpNode.new(node, op_token, bitwise)
     end
 
     node
