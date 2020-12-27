@@ -25,3 +25,38 @@ $ ./lbasi.rb <<< "5 / (3 - -1)"
 $ ./lbasi.rb <<< "-(+5 / (3 - -1))"
 -1.25
 ```
+
+## Grammar
+
+The current grammar is as follows
+
+```
+expr = term , '+' , term
+     | term , '-' , term
+     | term
+     ;
+
+term = unary , '*' , unary
+     | unary , '/' , unary
+     | unary , '%' , unary
+     | unary
+     ;
+
+unary = '+' , expr
+      | '-' , expr
+      | factor
+      ;
+
+factor = parenthesis
+       | NUMBER
+       ;
+
+parenthesis = '(' , expr , ')'
+            ;
+
+NUMBER = {DIGIT} , ['.' , {DIGIT}]
+       ;
+
+DIGIT = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+      ;
+```

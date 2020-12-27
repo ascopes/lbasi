@@ -78,7 +78,9 @@ end
 #
 #   expr        = term (('+'|'-') term)*
 #
-#   term        = factor (('*'|'/'|'%') factor)*
+#   term        = unary (('*'|'/'|'%') unary)*
+#
+#   unary       = '+' expr | '-' expr | factor
 #
 #   factor      = parenthesis | number
 #
@@ -115,24 +117,8 @@ class Interpreter
 
   private :parenthesis
 
-  def unary
-    token = @current_token
-
-    if token.type == :MINUS
-      eat(:MINUS)
-      -expr
-    else
-      eat(:PLUS)
-      expr
-    end
-  end
-
-  private :unary
-
   def factor
-    if %i[PLUS MINUS].include?(@current_token.type)
-      unary
-    elsif @current_token.type == :LPAREN
+    if @current_token.type == :LPAREN
       parenthesis
     else
       number
@@ -141,17 +127,34 @@ class Interpreter
 
   private :factor
 
+  def unary
+    token = @current_token
+
+    case token.type
+    when :MINUS
+      eat(:MINUS)
+      -expr
+    when :PLUS
+      eat(:PLUS)
+      expr
+    else
+      factor
+    end
+  end
+
+  private :unary
+
   def term
-    result = factor
+    result = unary
 
     while %i[MUL DIV MOD].include?(@current_token.type)
       token = @current_token
       eat(token.type)
 
       case token.type
-      when :MUL then result *= factor
-      when :DIV then result /= factor
-      when :MOD then result %= factor
+      when :MUL then result *= unary
+      when :DIV then result /= unary
+      when :MOD then result %= unary
       end
     end
 
