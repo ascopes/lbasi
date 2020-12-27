@@ -28,7 +28,7 @@ $ ./lbasi.rb <<< "-(+5 / (3 - -1))"
 
 ## Grammar
 
-The current grammar is as follows
+The current grammar is as follows (using [EBNF notation](https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form#Examples)).
 
 ```
 expr = term , '+' , term
@@ -57,6 +57,6 @@ parenthesis = '(' , expr , ')'
 NUMBER = {DIGIT} , ['.' , {DIGIT}]
        ;
 
-DIGIT = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+DIGIT = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
       ;
 ```
