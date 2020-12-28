@@ -3,13 +3,21 @@
 # Pascal interpreter definitions.
 class NodeVisitor
   def visit(node)
-    method("visit_#{node.class.name}").call(node)
-  rescue NameError
-    visit_unknown(node)
+    name = visitor_method_name(node)
+    begin
+      method(name).call(node)
+    rescue NameError
+      visit_unknown(node, name)
+    end
   end
 
-  protected def visit_unknown(node)
-    raise "No visit_#{node.class.name} method for node"
+  protected def visit_unknown(_node, name)
+    raise "No #{name} method for node"
+  end
+
+  private def visitor_method_name(node)
+    # XXX: optimise this eventually somehow.
+    "visit_#{node.class.name.gsub(/(?<=[^A-Z])(?=[A-Z])/, '_').downcase}"
   end
 end
 
@@ -20,11 +28,11 @@ class Interpreter < NodeVisitor
     @parser = parser
   end
 
-  def visit_NumberNode(node)
+  def visit_number_node(node)
     node.value
   end
 
-  def visit_UnaryOpNode(node)
+  def visit_unary_op_node(node)
     case node.operator.type
     when :PLUS then visit(node.value)
     when :MINUS then -visit(node.value)
@@ -33,7 +41,7 @@ class Interpreter < NodeVisitor
     end
   end
 
-  def visit_BinaryOpNode(node)
+  def visit_binary_op_node(node)
     case node.operator.type
     when :PLUS then visit(node.left) + visit(node.right)
     when :MINUS then visit(node.left) - visit(node.right)

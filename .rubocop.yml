@@ -1,6 +1,6 @@
 AllCops:
   NewCops: enable
-  TargetRubyVersion: 2.7
+  TargetRubyVersion: 3.0
   
 Metrics/AbcSize:
   Enabled: false
@@ -10,9 +10,6 @@ Metrics/CyclomaticComplexity:
   Enabled: false
 Metrics/MethodLength:
   Enabled: false
-Naming/MethodName:
-  Exclude:
-    - 'pascal-rb/interpreter.rb'
 Style/AccessModifierDeclarations:
   AllowModifiersOnSymbols: false
   EnforcedStyle: inline
