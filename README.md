@@ -38,7 +38,7 @@ This implementation is not built for performance. However, as of part 9, a crude
 can be seen with the following results:
 
 ```bash
-# VM
+$ # VM
 $ time ruby pascal.rb <<< "
 begin
     x := 1;
@@ -46,17 +46,23 @@ begin
     z2 := (x*2 + y*2);
 end.
 "
+```
+```
 {"X"=>1, "Y"=>2, "Z2"=>6}
 ruby pascal.rb <<<   0.14s user 0.02s system 96% cpu 0.163 total
+```
 
-# MJIT (including compilation time)
-time ruby --jit pascal.rb <<< "
+```bash
+$ # MJIT (including compilation time)
+$ time ruby --jit pascal.rb <<< "
 begin
     x := 1;
     y := 2;
     z2 := (x*2 + y*2);
 end.
 "
+```
+```
 {"X"=>1, "Y"=>2, "Z2"=>6}
 ruby --jit pascal.rb <<<   0.71s user 0.07s system 162% cpu 0.482 total
 ```
