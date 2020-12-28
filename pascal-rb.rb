@@ -5,14 +5,18 @@ require_relative 'pascal-rb/interpreter'
 require_relative 'pascal-rb/lexer'
 require_relative 'pascal-rb/parser'
 
-until ARGF.eof?
-  line = ARGF.readline.chop
+begin
+  until ARGF.eof?
+    line = ARGF.readline.chop
 
-  exit(true) if line == '/quit'
+    exit(true) if line == '/quit'
 
-  lexer = Lexer.new(line)
-  parser = Parser.new(lexer)
-  interpreter = Interpreter.new(parser)
+    lexer = Lexer.new(line)
+    parser = Parser.new(lexer)
+    interpreter = Interpreter.new(parser)
 
-  puts(interpreter.interpret)
+    puts(interpreter.interpret)
+  end
+rescue Interrupt
+  exit(true)
 end
