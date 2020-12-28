@@ -46,7 +46,10 @@ Position = Struct.new(:offset, :line, :column)
 # Incremental tokenizer. This consumes an IO object.
 class Lexer
   def initialize(reader)
-    if [ARGF, $stdin].include?(reader)
+    reader = ARGF.file if reader == ARGF
+    
+    if reader == $stdin
+      puts "WARNING: reading from stdin, incremental reading will be disabled"
       # We cannot use OS level buffering on STDIN properly,
       # once we hit the end of the file, STDIN closes abruptly
       # causing reverse seeking during peeking to fail.

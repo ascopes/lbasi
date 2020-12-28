@@ -34,8 +34,11 @@ $ ./pascal.rb scripts/HelloWorld.pas
 
 ## Performance
 
-This implementation is not built for performance. However, as of part 9, a crude benchmark
-can be seen with the following results:
+This implementation is not built for performance. The lexer is implemented
+to read files incrementally where possible (this does not work correctly with
+stdin, so using that will result in the entire script being loaded eagerly).
+
+As of part 9, a crude benchmark can be seen with the following results:
 
 ```bash
 $ # VM
