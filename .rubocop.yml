@@ -13,4 +13,3 @@ Metrics/MethodLength:
 Style/AccessModifierDeclarations:
   AllowModifiersOnSymbols: false
   EnforcedStyle: inline
-
