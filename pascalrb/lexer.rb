@@ -45,11 +45,13 @@ Position = Struct.new(:offset, :line, :column)
 
 # Incremental tokenizer. This consumes an IO object.
 class Lexer
-  def initialize(reader)
+  def initialize(reader, **kwargs)
     reader = ARGF.file if reader == ARGF
-    
+
+    @debug = kwargs['debug'] || false
+
     if reader == $stdin
-      puts "WARNING: reading from stdin, incremental reading will be disabled"
+      puts 'WARNING: reading from stdin, incremental reading will be disabled'
       # We cannot use OS level buffering on STDIN properly,
       # once we hit the end of the file, STDIN closes abruptly
       # causing reverse seeking during peeking to fail.
@@ -66,6 +68,12 @@ class Lexer
   end
 
   def next_token
+    token = read_next_token
+    p token if @debug
+    token
+  end
+
+  private def read_next_token
     # Always allow whitespace between individual tokens.
     skip_ws
 
@@ -74,8 +82,11 @@ class Lexer
 
     case next_chunk
     when nil then return Token.new(:EOF, nil, position)
-    when /^[A-Za-z_]/ then return identifier_token(position)
-    when /^\d/ then return integer_token(position)
+    when /^[a-z_]/i then return identifier_token(position)
+    when /^\d/ then return decimal_token(position)
+    when /^\$\d/ then return hex_token(position)
+    when /^&\d/ then return oct_token(position)
+    when /^%\d/ then return bin_token(position)
     else
       # Look up the operator in the table. We start with the longest
       # possible operator and keep chopping down until we run out of
@@ -120,29 +131,76 @@ class Lexer
     step while get_raw =~ /\s/
   end
 
-  private def integer_token(position)
+  private def buffer_raw_while(pattern)
     buff = []
 
-    while (current_char = get_raw) =~ /\d/
-      buff.append current_char
+    while (char = get_raw) =~ pattern
+      buff.append char
       step
     end
 
-    Token.new(:INTEGER, buff.join, position)
+    buff.join
+  end
+
+  private def bin_token(position)
+    step
+    number = buffer_raw_while(/[01]/).to_i(2)
+    Token.new(:INTEGER_CONST, number, position)
+  end
+
+  private def oct_token(position)
+    step
+    number = buffer_raw_while(/[0-7]/).to_i(8)
+    Token.new(:INTEGER_CONST, number, position)
+  end
+
+  private def hex_token(position)
+    step
+    number = buffer_raw_while(/[0-9a-f]/i).to_i(16)
+    Token.new(:INTEGER_CONST, number, position)
+  end
+
+  private def decimal_token(position)
+    # Reference: https://www.freepascal.org/docs-html/ref/refse6.html
+    number = buffer_raw_while(/\d/)
+    is_real = false
+
+    if get_raw(2) =~ /^\.\d/
+      is_real = true
+      step
+      number += '.'
+      number += buffer_raw_while(/\d/)
+    end
+
+    if (symbol = get_raw).downcase == 'e'
+      is_real = true
+      step
+      number += 'E'
+
+      if (symbol = get_raw) =~ /[+-]/
+        step
+        number += symbol
+      end
+
+      unless get_raw =~ /\d/
+        raise "Unexpected literal '#{number}' in input at #{position.offset} (#{position.line}:#{position.column})"
+      end
+
+      number += buffer_raw_while(/\d/)
+    end
+
+    if is_real
+      Token.new(:REAL_CONST, number.to_f, position)
+    else
+      Token.new(:INTEGER_CONST, number.to_i, position)
+    end
   end
 
   private def identifier_token(position)
-    buff = []
-
     # Technically the first character cannot be a number. Our
     # design avoids allowing this anyway though, so it isn't really
     # that important to put an edge case in for that here.
-    while (current_char = get_raw) =~ /[A-Za-z_0-9]/
-      buff.append current_char
-      step
-    end
-
-    identifier = buff.join.upcase
+    identifier = buffer_raw_while(/[A-Z_0-9]/i).upcase
 
     if KEYWORDS.keys.include? identifier
       Token.new(KEYWORDS[identifier], identifier, position)

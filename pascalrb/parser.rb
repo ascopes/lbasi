@@ -9,7 +9,15 @@ UnaryOpNode = Struct.new(:op, :expr)
 # A number node.
 NumberNode = Struct.new(:token) do
   def value
+    token.value
+  end
+
+  def value_int
     token.value.to_i
+  end
+
+  def value_float
+    token.value.to_f
   end
 end
 
@@ -132,15 +140,16 @@ class Parser
     # factor = PLUS , factor
     #        | MINUS , factor
     #        | NOT , factor
-    #        | INTEGER
+    #        | INTEGER_CONST
+    #        | REAL_CONST
     #        | LPAREN , expr , RPAREN
     #        | variable
     #        ;
     if %i[PLUS MINUS NOT].include?(@current_token.type)
       token = eat @current_token.type
       UnaryOpNode.new(token, factor)
-    elsif @current_token.type == :INTEGER
-      token = eat :INTEGER
+    elsif %i[INTEGER_CONST REAL_CONST].include? @current_token.type
+      token = eat @current_token.type
       NumberNode.new token
     elsif @current_token.type == :LPAREN
       eat :LPAREN

@@ -32,8 +32,13 @@ class Interpreter < Visitor
     when :PLUS then visit(node.left) + visit(node.right)
     when :MINUS then visit(node.left) - visit(node.right)
     when :MUL then visit(node.left) * visit(node.right)
-    # XXX: differentiate between division and integer division once we have REAL types.
-    when :DIV, :INT_DIV then visit(node.left) / visit(node.right)
+    when :DIV then visit(node.left).to_f / visit(node.right)
+    when :INT_DIV
+      left = visit(node.left)
+      right = visit(node.right)
+      raise "Expected integer oprands for DIV on #{node}" unless left.is_a?(Integer) && right.is_a?(Integer)
+
+      left / right
     else panic_about_operator node.op
     end
   end
