@@ -6,6 +6,7 @@ require 'stringio'
 # Operators. These are non-alphanumeric tokens.
 OPERATORS = {
   ':=' => :ASSIGN,
+  ':' => :COLON,
   ',' => :COMMA,
   '/' => :DIV,
   '.' => :DOT,
@@ -28,7 +29,11 @@ KEYWORDS = {
   'BEGIN' => :BEGIN,
   'DIV' => :INT_DIV,
   'END' => :END,
-  'MOD' => :MOD
+  'INTEGER' => :INTEGER,
+  'MOD' => :MOD,
+  'PROGRAM' => :PROGRAM,
+  'REAL' => :REAL,
+  'VAR' => :VAR
 }.freeze
 
 # Literal value types and identifiers.
@@ -75,7 +80,7 @@ class Lexer
 
   private def read_next_token
     # Always allow whitespace between individual tokens.
-    skip_ws
+    skip_comment_or_ws
 
     position = Position.new(@reader.tell, @line, @col)
     next_chunk = get_raw MAX_OPERATOR_LENGTH
@@ -125,6 +130,25 @@ class Lexer
 
     @reader.seek(-result.length, IO::SEEK_CUR)
     result
+  end
+
+  private def skip_comment_or_ws
+    skip_ws
+
+    raw = get_raw(2)
+
+    case raw
+    when /^\{/
+      step
+      step while get_raw != '}'
+      step
+    when /^\(\*/
+      step 2
+      step while get_raw(2) != '*)'
+      step 2
+    end
+
+    skip_ws
   end
 
   private def skip_ws

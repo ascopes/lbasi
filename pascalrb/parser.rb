@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+require 'set'
+
+# Program.
+ProgramNode = Struct.new(:name, :block)
+
 # Binary operation.
 BinOpNode = Struct.new(:left, :op, :right)
 
@@ -21,11 +26,24 @@ NumberNode = Struct.new(:token) do
   end
 end
 
+# Code block. (VAR ... compound -- OR -- compound).
+BlockNode = Struct.new(:declarations, :compound_statement)
+
+# Variable definition.
+VariableDeclarationNode = Struct.new(:identifier, :type)
+
 # Compound statement (BEGIN ... END block).
 CompoundNode = Struct.new(:children)
 
 # An assignment expression.
 AssignmentNode = Struct.new(:left, :op, :right)
+
+# Type definition.
+TypeNode = Struct.new(:token) do
+  def name
+    token.value.upcase
+  end
+end
 
 # A variable node.
 VariableNode = Struct.new(:token) do
@@ -37,6 +55,11 @@ end
 # A null operation. This does nothing useful. It is used
 # in places where a statement has no content.
 NoOpNode = Struct.new(:position)
+
+VALID_TYPES = Set[
+  :INTEGER,
+  :REAL
+].freeze
 
 # Parser. Consumes an incremental lexer instance.
 class Parser
@@ -52,10 +75,51 @@ class Parser
   end
 
   private def program
-    # program = compound_statement , DOT ;
-    compound = compound_statement
+    # program = PROGRAM , variable , SEMICOLON, block , DOT ;
+    eat :PROGRAM
+    program_name = variable.name
+    eat :SEMICOLON
+    code_block = block
     eat :DOT
-    compound
+
+    ProgramNode.new(program_name, code_block)
+  end
+
+  private def block
+    # block = declarations , compound_statement ;
+    BlockNode.new(declarations, compound_statement)
+  end
+
+  private def declarations
+    # declarations = [ VAR , variable_declaration , SEMICOLON , [ { variable_declaration , SEMICOLON } ] ] ;
+    eat :VAR
+    declarations = [*variable_declaration]
+    eat :SEMICOLON
+
+    while @current_token.type == :IDENTIFIER
+      declarations += variable_declaration
+      eat :SEMICOLON
+    end
+
+    declarations
+  end
+
+  private def variable_declaration
+    # variable_declaration = IDENTIFIER , [ { COMMA , IDENTIFIER } ] , COLON , type_spec ;
+    identifiers = [eat(:IDENTIFIER)]
+
+    while @current_token.type == :COMMA
+      eat :COMMA
+      identifiers.append eat(:IDENTIFIER)
+    end
+
+    eat :COLON
+
+    type = type_spec
+
+    identifiers.map do |identifier|
+      VariableDeclarationNode.new(identifier, type)
+    end
   end
 
   private def compound_statement
@@ -99,6 +163,13 @@ class Parser
     right = expr
 
     AssignmentNode.new(left, op, right)
+  end
+
+  private def type_spec
+    # type_spec = INTEGER | REAL
+    raise "Expected a type but got #{@current_token}" unless VALID_TYPES.include? @current_token.type
+
+    TypeNode.new eat @current_token.type
   end
 
   private def variable
