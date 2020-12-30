@@ -1,16 +1,22 @@
 # frozen_string_literal: true
 
+require_relative 'dataclass'
+
 # Program.
-ProgramNode = Struct.new(:name, :block)
+ProgramNode = Dataclass.new(:name, :block)
 
 # Binary operation.
-BinOpNode = Struct.new(:left, :op, :right)
+BinOpNode = Dataclass.new(:left, :op, :right) do
+  def to_s
+    "BinOp(#{name})"
+  end
+end
 
 # Unary operation.
-UnaryOpNode = Struct.new(:op, :expr)
+UnaryOpNode = Dataclass.new(:op, :expr)
 
 # A number node.
-NumberNode = Struct.new(:token) do
+NumberNode = Dataclass.new(:token) do
   def value
     token.value
   end
@@ -25,26 +31,26 @@ NumberNode = Struct.new(:token) do
 end
 
 # Code block. (VAR ... compound -- OR -- compound).
-BlockNode = Struct.new(:declarations, :compound_statement)
+BlockNode = Dataclass.new(:declarations, :compound_statement)
 
 # Variable definition.
-VariableDeclarationNode = Struct.new(:identifier, :type)
+VariableDeclarationNode = Dataclass.new(:identifier, :type)
 
 # Compound statement (BEGIN ... END block).
-CompoundNode = Struct.new(:children)
+CompoundNode = Dataclass.new(:children)
 
 # An assignment expression.
-AssignmentNode = Struct.new(:left, :op, :right)
+AssignmentNode = Dataclass.new(:left, :op, :right)
 
 # Type definition.
-TypeNode = Struct.new(:token) do
+TypeNode = Dataclass.new(:token) do
   def name
     token.value.upcase
   end
 end
 
 # A variable node.
-VariableNode = Struct.new(:token) do
+VariableNode = Dataclass.new(:token) do
   def name
     token.value.upcase
   end
@@ -52,4 +58,4 @@ end
 
 # A null operation. This does nothing useful. It is used
 # in places where a statement has no content.
-NoOpNode = Struct.new(:position)
+NoOpNode = Dataclass.new(:position)

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'set'
+require_relative 'dataclass'
 
 # Operators. These are non-alphanumeric tokens.
 OPERATORS = {
@@ -42,7 +43,7 @@ LITERAL_TYPES = Set[
 ].freeze
 
 # Token type.
-Token = Struct.new(:type, :value, :position)
+Token = Dataclass.new(:type, :value, :position)
 
 # File position type.
-Position = Struct.new(:offset, :line, :column)
+Position = Dataclass.new(:offset, :line, :column)
