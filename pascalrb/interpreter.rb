@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# Symbol type.
+Symbol = Struct.new(:name, :type)
+
 # Base logic for any visitor implementation. This handles dynamically
 # dispatching the correct method for each type of AST node.
 class Visitor
