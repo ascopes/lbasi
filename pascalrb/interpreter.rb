@@ -1,33 +1,18 @@
 # frozen_string_literal: true
 
-# Symbol type.
-Symbol = Struct.new(:name, :type)
-
-# Base logic for any visitor implementation. This handles dynamically
-# dispatching the correct method for each type of AST node.
-class Visitor
-  def visit(node)
-    # e.g. BinOpNode -> visit_bin_op_node
-    name = "visit_#{node.class.name.gsub(/(?<=[^A-Z])(?=[A-Z])/, '_').downcase}"
-    begin
-      method(name).call(node)
-    rescue NoMethodError
-      raise NoMethodError, "No method while processing #{node}"
-    end
-  end
-end
+require_relative 'visitor'
 
 # Interpreter implementation.
 class Interpreter < Visitor
-  def initialize(parser)
+  def initialize(tree)
     super()
-    @parser = parser
+    @tree = tree
     @program_name = nil
     @global_scope = {}
   end
 
   def interpret
-    visit @parser.parse
+    visit @tree
     puts "Resultant variables for program #{@program_name}"
     puts @global_scope
   end
@@ -53,16 +38,16 @@ class Interpreter < Visitor
     end
   end
 
-  def visit_number_node(node)
-    node.value
-  end
-
   def visit_unary_op_node(node)
     case node.op.type
     when :PLUS then +node.expr
     when :MINUS then -node.expr
     else panic_about_operator node.op
     end
+  end
+
+  def visit_number_node(node)
+    node.value
   end
 
   def visit_block_node(node)

@@ -4,8 +4,11 @@
 require_relative 'pascalrb/interpreter'
 require_relative 'pascalrb/lexer'
 require_relative 'pascalrb/parser'
+require_relative 'pascalrb/symbol'
 
 lexer = Lexer.new(ARGF, debug: true)
 parser = Parser.new lexer
-interpreter = Interpreter.new parser
+tree = parser.parse
+symbol_table = SymbolTableBuilder.new.build tree
+interpreter = Interpreter.new tree
 interpreter.interpret
