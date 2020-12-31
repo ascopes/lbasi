@@ -1,12 +1,6 @@
 # frozen_string_literal: true
 
-require 'set'
 require_relative 'ast'
-
-VALID_TYPES = Set[
-  :INTEGER,
-  :REAL
-].freeze
 
 # Parser. Consumes an incremental lexer instance.
 class Parser
@@ -113,9 +107,7 @@ class Parser
   end
 
   private def type_spec
-    # type_spec = INTEGER | REAL
-    raise "Expected a type but got #{@current_token}" unless VALID_TYPES.include? @current_token.type
-
+    # type_spec = INTEGER | REAL | IDENTIFIER
     TypeNode.new eat @current_token.type
   end
 
