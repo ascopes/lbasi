@@ -6,11 +6,7 @@ require_relative 'dataclass'
 ProgramNode = Dataclass.new(:name, :block)
 
 # Binary operation.
-BinOpNode = Dataclass.new(:left, :op, :right) do
-  def to_s
-    "BinOp(#{name})"
-  end
-end
+BinOpNode = Dataclass.new(:left, :op, :right)
 
 # Unary operation.
 UnaryOpNode = Dataclass.new(:op, :expr)
