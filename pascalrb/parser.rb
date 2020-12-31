@@ -107,7 +107,7 @@ class Parser
   end
 
   private def type_spec
-    # type_spec = INTEGER | REAL | IDENTIFIER
+    # type_spec = INTEGER | REAL | IDENTIFIER ;
     TypeNode.new eat @current_token.type
   end
 
