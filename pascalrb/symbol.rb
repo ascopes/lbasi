@@ -49,7 +49,7 @@ class SymbolTable
   def lookup(name, position)
     p("Look up #{name}") if @debug
     symbol = @symbols[name]
-    raise(PascalMissingNameError, name, position) if symbol.nil?
+    raise(PascalMissingNameError.new(name, position)) if symbol.nil?
 
     symbol
   end
