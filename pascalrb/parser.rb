@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'ast'
+require_relative('ast')
 
 # Parser. Consumes an incremental lexer instance.
 class Parser
@@ -11,27 +11,27 @@ class Parser
 
   def parse
     result = program
-    eat :EOF
+    eat(:EOF)
     result
   end
 
-  private def program
+  def program
     # program = PROGRAM , variable , SEMICOLON, block , DOT ;
-    eat :PROGRAM
+    eat(:PROGRAM)
     program_name = variable.name
-    eat :SEMICOLON
+    eat(:SEMICOLON)
     code_block = block
-    eat :DOT
+    eat(:DOT)
 
     ProgramNode.new(program_name, code_block)
   end
 
-  private def block
+  def block
     # block = declarations , compound_statement ;
     BlockNode.new(declarations, compound_statement)
   end
 
-  private def declarations
+  def declarations
     # declarations = [ VAR , variable_declaration , SEMICOLON , [ { variable_declaration , SEMICOLON } ] ] ,
     #                [ { PROCEDURE , IDENTIFIER , SEMICOLON , block , SEMICOLON } ] ;
 
@@ -40,42 +40,41 @@ class Parser
     # We don't havee to define any variables, but if we do, we must have AT LEAST ONE identifier there.
     if @current_token.type == :VAR
       # parse one or more identifier declarations.
-      eat :VAR
+      eat(:VAR)
 
-      if @current_token.type != :IDENTIFIER
-        raise "Expected at least one identifier in VAR section at #{@current_token.position}"
-      end
+      # Don't eat the identifier, as we parse it in the variable_declaration grammar.
+      taste(:IDENTIFIER)
 
       while @current_token.type == :IDENTIFIER
         # Each variable declaration may define more than one identifier at once
         # so we want to add all of them by extending the array.
         declarations += variable_declaration
-        eat :SEMICOLON
+        eat(:SEMICOLON)
       end
     end
 
     # We can then have zero or more procedures.
     while @current_token.type == :PROCEDURE
-      eat :PROCEDURE
-      procedure_name = (eat :IDENTIFIER).value
-      eat :SEMICOLON
+      eat(:PROCEDURE)
+      procedure_name = eat(:IDENTIFIER).value
+      eat(:SEMICOLON)
       declarations.append(ProcedureDeclarationNode.new(procedure_name, block))
-      eat :SEMICOLON
+      eat(:SEMICOLON)
     end
 
     declarations
   end
 
-  private def variable_declaration
+  def variable_declaration
     # variable_declaration = IDENTIFIER , [ { COMMA , IDENTIFIER } ] , COLON , type_spec ;
     identifiers = [eat(:IDENTIFIER)]
 
     while @current_token.type == :COMMA
-      eat :COMMA
-      identifiers.append eat(:IDENTIFIER)
+      eat(:COMMA)
+      identifiers.append(eat(:IDENTIFIER))
     end
 
-    eat :COLON
+    eat(:COLON)
 
     type = type_spec
 
@@ -84,90 +83,96 @@ class Parser
     end
   end
 
-  private def compound_statement
+  def compound_statement
     # compound_statement = BEGIN , statement_list , END ;
-    eat :BEGIN
+    eat(:BEGIN)
     compound = CompoundNode.new(statement_list)
-    eat :END
+    eat(:END)
     compound
   end
 
-  private def statement_list
+  def statement_list
     # statement_list = statement , [ { SEMICOLON , statement } ] ;
     statements = [statement]
 
     while @current_token.type == :SEMICOLON
-      eat :SEMICOLON
-      statements.append statement
+      eat(:SEMICOLON)
+      statements.append(statement)
     end
 
     statements
   end
 
-  private def statement
+  def statement
     # statement = compound_statement
     #           | assignment_statement
     #           | empty_statement
     #           ;
+
+    # Produces a helpful error message, at the cost of a redundant check.
+    # Also means we won't ever be able to return nil.
+    # XXX: will need updating if <empty_statement> definition changes ever.
+    taste(:BEGIN, :IDENTIFIER, :END)
+
     case @current_token.type
     when :BEGIN then compound_statement
     when :IDENTIFIER then assignment_statement
-    else empty_statement
+    when :END then empty_statement
     end
   end
 
-  private def assignment_statement
+  def assignment_statement
     # assignment_statement = variable , ASSIGN , expr ;
     left = variable
 
-    op = eat :ASSIGN
+    op = eat(:ASSIGN)
 
     right = expr
 
     AssignmentNode.new(left, op, right)
   end
 
-  private def type_spec
+  def type_spec
     # type_spec = INTEGER | REAL | IDENTIFIER
-    TypeNode.new eat @current_token.type
+    TypeNode.new(eat(@current_token.type))
   end
 
-  private def variable
+  def variable
     # variable = IDENTIFIER ;
-    id = eat :IDENTIFIER
-    VariableNode.new id
+    id = eat(:IDENTIFIER)
+    VariableNode.new(id)
   end
 
-  private def empty_statement
+  def empty_statement
     # empty statement = ;
     NoOpNode.new(@lexer.position)
   end
 
-  private def expr
+  def expr
     # expr = term , [ { ( PLUS | MINUS ) , term } ] ;
     node = term
 
-    while %i[PLUS MINUS].include? @current_token.type
-      op = eat @current_token.type
+    while %i[PLUS MINUS].include?(@current_token.type)
+      op = eat(@current_token.type)
       node = BinOpNode.new(node, op, term)
     end
 
     node
   end
 
-  private def term
+  def term
     # term = factor , [ { ( DIV | INT_DIV | MOD | MUL ) , factor } ] ;
     node = factor
 
-    while %i[DIV INT_DIV MOD MUL].include? @current_token.type
-      op = eat @current_token.type
+    while %i[DIV INT_DIV MOD MUL].include?(@current_token.type)
+      op = eat(@current_token.type)
       node = BinOpNode.new(node, op, factor)
     end
 
     node
   end
 
-  private def factor
+  def factor
     # factor = PLUS , factor
     #        | MINUS , factor
     #        | NOT , factor
@@ -176,33 +181,40 @@ class Parser
     #        | LPAREN , expr , RPAREN
     #        | variable
     #        ;
+
+    # Produces a helpful error message, at the cost of a redundant check.
+    # Also means we won't ever be able to return nil.
+    # XXX: will need updating if <variable> definition changes ever.
+    taste(:PLUS, :MINUS, :NOT, :INTEGER_CONST, :REAL_CONST, :LPAREN, :IDENTIFIER)
+
     if %i[PLUS MINUS NOT].include?(@current_token.type)
-      token = eat @current_token.type
+      token = eat(@current_token.type)
       UnaryOpNode.new(token, factor)
-    elsif %i[INTEGER_CONST REAL_CONST].include? @current_token.type
-      token = eat @current_token.type
-      NumberNode.new token
+    elsif %i[INTEGER_CONST REAL_CONST].include?(@current_token.type)
+      token = eat(@current_token.type)
+      NumberNode.new(token)
     elsif @current_token.type == :LPAREN
-      eat :LPAREN
+      eat(:LPAREN)
       result = expr
-      eat :RPAREN
+      eat(:RPAREN)
       result
-    else
+    elsif @current_token.type == :IDENTIFIER
       variable
     end
   end
 
-  private def eat(type)
-    unexpected_token type if type != @current_token.type
+  # Error if the current token is not one of the given types.
+  def taste(*types)
+    raise(PascalParserSyntaxError.new(@current_token, *types)) unless types.include?(@current_token.type)
+  end
 
+  # Taste the current token to see if it is the given type. If it is,
+  # consume it, return it, and read the next token from the lexer, setting
+  # that to @current_token.
+  def eat(type)
+    taste(type)
     old_token = @current_token
     @current_token = @lexer.next_token
     old_token
-  end
-
-  private def unexpected_token(type)
-    raise "Expected token of type #{type} but received #{@current_token.type}\n" \
-          "Position: #{@current_token.position}\n" \
-          "Token: #{@current_token}"
   end
 end

@@ -1,6 +1,6 @@
 # Pascal interpreter implemented in Ruby 3.0.0
 
-Following [Ruslan's Blog](https://ruslanspivak.com/lsbasi-part12/).
+Following [Ruslan's Blog](https://ruslanspivak.com/lsbasi-part13/).
 
 This uses Ruby 3.0.0, to install it, use [ruby-build](https://github.com/rbenv/ruby-build).
 

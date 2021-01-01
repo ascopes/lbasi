@@ -9,7 +9,7 @@ class Visitor
     begin
       method(name).call(node)
     rescue NoMethodError
-      raise NoMethodError, "No method while processing #{node}"
+      raise(NoMethodError, "No method while processing #{node}")
     end
   end
 end

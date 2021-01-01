@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'set'
-require_relative 'dataclass'
+require('set')
+require_relative('dataclass')
 
 # Operators. These are non-alphanumeric tokens.
 OPERATORS = {
@@ -31,6 +31,7 @@ KEYWORDS = {
   'END' => :END,
   'INTEGER' => :INTEGER,
   'MOD' => :MOD,
+  'NOT' => :NOT,
   'PROCEDURE' => :PROCEDURE,
   'PROGRAM' => :PROGRAM,
   'REAL' => :REAL,
@@ -38,7 +39,11 @@ KEYWORDS = {
 }.freeze
 
 # Token type.
-Token = Dataclass.new(:type, :value, :position)
-
-# File position type.
-Position = Dataclass.new(:offset, :line, :column)
+Token = Dataclass.new(:category, :type, :value, :position) do
+  def human_readable_str
+    token_str = type.to_s
+    token_str += " -> #{value.inspect}" unless value.nil?
+    token_str += " at #{position}"
+    "#{category.downcase} #{token_str}" unless category.nil?
+  end
+end

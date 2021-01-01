@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'dataclass'
+require_relative('dataclass')
 
 # Program.
 ProgramNode = Dataclass.new(:name, :block)
@@ -52,6 +52,10 @@ end
 VariableNode = Dataclass.new(:token) do
   def name
     token.value.upcase
+  end
+
+  def position
+    token.position
   end
 end
 

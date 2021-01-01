@@ -12,4 +12,18 @@ Metrics/MethodLength:
   Enabled: false
 Style/AccessModifierDeclarations:
   AllowModifiersOnSymbols: false
-  EnforcedStyle: inline
+Style/DefWithParentheses:
+  Enabled: false
+Style/MethodCallWithArgsParentheses:
+  AllowParenthesesInCamelCaseMethod: true
+  AllowParenthesesInChaining: true
+  AllowParenthesesInMultilineCall: true
+  Enabled: true
+  IgnoreMacros: true
+  EnforcedStyle: require_parentheses
+Style/MethodCallWithoutArgsParentheses:
+  Enabled: false
+Style/MethodCalledOnDoEndBlock:
+  Enabled: true
+Style/TrailingCommaInArguments:
+  EnforcedStyleForMultiline: consistent_comma
