@@ -170,7 +170,7 @@ class Lexer
       unless next_char =~ /\d/
         raise(
           PascalLexerSyntaxError.new(
-            number, curr_position,
+            number + next_char, curr_position,
             "Unexpected character #{next_char.inspect} found while parsing number",
           ),
         )
