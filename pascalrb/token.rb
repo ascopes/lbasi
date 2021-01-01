@@ -31,16 +31,11 @@ KEYWORDS = {
   'END' => :END,
   'INTEGER' => :INTEGER,
   'MOD' => :MOD,
+  'PROCEDURE' => :PROCEDURE,
   'PROGRAM' => :PROGRAM,
   'REAL' => :REAL,
   'VAR' => :VAR
 }.freeze
-
-# Literal value types and identifiers.
-LITERAL_TYPES = Set[
-  :INTEGER,
-  :IDENTIFIER,
-].freeze
 
 # Token type.
 Token = Dataclass.new(:type, :value, :position)
