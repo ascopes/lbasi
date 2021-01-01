@@ -65,6 +65,11 @@ class Interpreter < Visitor
     @global_scope[node.identifier.value] = :UNSET
   end
 
+  def visit_procedure_declaration_node(node)
+    # We will handle nested procedures at a later time, for now this
+    # does not do anything.
+  end
+
   def visit_type(node)
     node.name
   end

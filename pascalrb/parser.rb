@@ -32,13 +32,34 @@ class Parser
   end
 
   private def declarations
-    # declarations = [ VAR , variable_declaration , SEMICOLON , [ { variable_declaration , SEMICOLON } ] ] ;
-    eat :VAR
-    declarations = [*variable_declaration]
-    eat :SEMICOLON
+    # declarations = [ VAR , variable_declaration , SEMICOLON , [ { variable_declaration , SEMICOLON } ] ] ,
+    #                [ { PROCEDURE , IDENTIFIER , SEMICOLON , block , SEMICOLON } ] ;
 
-    while @current_token.type == :IDENTIFIER
-      declarations += variable_declaration
+    declarations = []
+
+    # We don't havee to define any variables, but if we do, we must have AT LEAST ONE identifier there.
+    if @current_token.type == :VAR
+      # parse one or more identifier declarations.
+      eat :VAR
+
+      if @current_token.type != :IDENTIFIER
+        raise "Expected at least one identifier in VAR section at #{@current_token.position}"
+      end
+
+      while @current_token.type == :IDENTIFIER
+        # Each variable declaration may define more than one identifier at once
+        # so we want to add all of them by extending the array.
+        declarations += variable_declaration
+        eat :SEMICOLON
+      end
+    end
+
+    # We can then have zero or more procedures.
+    while @current_token.type == :PROCEDURE
+      eat :PROCEDURE
+      procedure_name = (eat :IDENTIFIER).value
+      eat :SEMICOLON
+      declarations.append(ProcedureDeclarationNode.new(procedure_name, block))
       eat :SEMICOLON
     end
 

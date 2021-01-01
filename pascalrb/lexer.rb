@@ -5,10 +5,10 @@ require_relative 'token'
 
 # Incremental tokenizer. This consumes an IO object.
 class Lexer
-  def initialize(reader, **kwargs)
+  def initialize(reader, debug)
     reader = ARGF.file if reader == ARGF
 
-    @debug = kwargs['debug'] || false
+    @debug = debug
 
     if reader == $stdin
       puts 'WARNING: reading from stdin, incremental reading will be disabled'

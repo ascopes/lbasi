@@ -6,9 +6,12 @@ require_relative 'pascalrb/lexer'
 require_relative 'pascalrb/parser'
 require_relative 'pascalrb/symbol'
 
-lexer = Lexer.new(ARGF, debug: true)
+DEBUG_MODE = ARGF.argv.delete('--debug') || false
+
+lexer = Lexer.new(ARGF, DEBUG_MODE)
 parser = Parser.new lexer
 tree = parser.parse
-symbol_table = SymbolTableBuilder.new.build tree
+symbol_table_builder = SymbolTableBuilder.new DEBUG_MODE
+symbol_table = symbol_table_builder.build tree
 interpreter = Interpreter.new tree
 interpreter.interpret

@@ -17,7 +17,8 @@ RealType = BuiltinTypeSymbol.new('REAL').freeze
 
 # Symbol table representation, preloaded with builtins.
 class SymbolTable
-  def initialize
+  def initialize(debug)
+    @debug = debug
     @symbols = {
       IntegerType.name => IntegerType,
       RealType.name => RealType
@@ -25,12 +26,12 @@ class SymbolTable
   end
 
   def define(symbol)
-    p "Define #{symbol.name} as type #{symbol.type}"
+    p "Define #{symbol.name} as type #{symbol.type}" if @debug
     @symbols[symbol.name] = symbol
   end
 
   def lookup(name)
-    p "Look up #{name}"
+    p "Look up #{name}" if @debug
     symbol = @symbols[name]
     raise "NameError: no symbol called #{name} is defined" if symbol.nil?
 
@@ -39,10 +40,12 @@ class SymbolTable
 end
 
 # Visits an AST to generate a symbol table.
+# Can take an optional "debug" argument to print when stuff is defined and/or searched
+# for within a lookup.
 class SymbolTableBuilder < Visitor
-  def initialize
+  def initialize(debug)
     super()
-    @symbol_table = SymbolTable.new
+    @symbol_table = SymbolTable.new(debug)
   end
 
   def visit_program_node(node)
@@ -87,6 +90,11 @@ class SymbolTableBuilder < Visitor
     type_symbol = @symbol_table.lookup(node.type.name)
     var_symbol = VariableSymbol.new(node.identifier.value, type_symbol)
     @symbol_table.define(var_symbol)
+  end
+
+  def visit_procedure_declaration_node(node)
+    # We will handle nested procedures at a later time, for now this
+    # does not do anything.
   end
 
   def build(ast)

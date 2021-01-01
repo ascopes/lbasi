@@ -32,6 +32,9 @@ BlockNode = Dataclass.new(:declarations, :compound_statement)
 # Variable definition.
 VariableDeclarationNode = Dataclass.new(:identifier, :type)
 
+# Procedure definition.
+ProcedureDeclarationNode = Dataclass.new(:name, :block)
+
 # Compound statement (BEGIN ... END block).
 CompoundNode = Dataclass.new(:children)
 
