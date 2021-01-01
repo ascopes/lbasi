@@ -1,0 +1,6 @@
+PROGRAM Part12;
+VAR
+   a : INTEGER;
+BEGIN
+    ;
+END.
