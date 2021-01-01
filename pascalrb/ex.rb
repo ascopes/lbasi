@@ -44,11 +44,27 @@ class PascalParserSyntaxError < PascalSyntaxError
 end
 
 # Error raised if a symbol name is accessed before being defined.
-class PascalNameError < PascalError
+class PascalMissingNameError < PascalError
   def initialize(name, where)
     @name = name
     @where = where
     super("Name Error!\n    No symbol named #{name.inspect} is defined at #{where}")
+  end
+
+  attr_reader :name, :where
+end
+
+# Raised if a variable is declared more than once.
+class PascalDuplicateNameError < PascalError
+  def initialize(name, previous_definition_position, current_definition_position)
+    @name = name
+    @previous_definition_position = previous_definition_position
+    @current_definition_position = current_definition_position
+    super(
+      "Name Error!\n    Symbol #{name.inspect} at " \
+      "#{current_definition_position} has already been defined " \
+      "at #{previous_definition_position}"
+    )
   end
 
   attr_reader :name, :where

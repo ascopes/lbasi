@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative('dataclass')
+require_relative('ex')
 require_relative('token')
 
 # Builtin-type.
@@ -35,13 +36,20 @@ class SymbolTable
 
   def define(symbol)
     p("Define #{symbol.name} as type #{symbol.type}") if @debug
+
+    existing_symbol = @symbols[symbol.name]
+
+    unless existing_symbol.nil?
+      raise(PascalDuplicateNameError.new(symbol.name, existing_symbol.defined_at, symbol.defined_at))
+    end
+
     @symbols[symbol.name] = symbol
   end
 
   def lookup(name, position)
     p("Look up #{name}") if @debug
     symbol = @symbols[name]
-    raise("NameError: no symbol called #{name} is defined at #{position}") if symbol.nil?
+    raise(PascalMissingNameError, name, position) if symbol.nil?
 
     symbol
   end
