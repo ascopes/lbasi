@@ -3,11 +3,11 @@
 def short_inspect(member)
   raw = member.inspect
 
-  if raw.length > 30
+  if raw.length > 100
     if raw[0] == '"'
-      "\"#{raw[1..30]}...\""
+      "\"#{raw[1..100]}...\""
     else
-      "#{raw[0..29]}..."
+      "#{raw[0..99]}..."
     end
   else
     raw

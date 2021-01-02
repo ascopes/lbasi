@@ -55,14 +55,54 @@ class Parser
 
     # We can then have zero or more procedures.
     while @current_token.type == :PROCEDURE
-      eat(:PROCEDURE)
+      position = eat(:PROCEDURE).position
       procedure_name = eat(:IDENTIFIER).value
+
+      if @current_token.type == :LPAREN
+        # parse parameters
+        eat(:LPAREN)
+        params = formal_parameters_list
+        eat(:RPAREN)
+      else
+        params = []
+      end
+
       eat(:SEMICOLON)
-      declarations.append(ProcedureDeclarationNode.new(procedure_name, block))
+      declarations.append(ProcedureDeclarationNode.new(procedure_name, params, block, position))
       eat(:SEMICOLON)
     end
 
     declarations
+  end
+
+  def formal_parameters_list
+    # formal_parameters_list = formal_parameters , [ { SEMICOLON , formal_parameters } ] ;
+    params = formal_parameters
+
+    while @current_token.type == :SEMICOLON
+      # Each parameter may have more than one identifier.
+      eat(:SEMICOLON)
+      params += formal_parameters
+    end
+    params
+  end
+
+  def formal_parameters
+    # formal_parameters = IDENTIFIER , [ { COMMA , IDENTIFIER } ] , COLON , type_spec ;
+    formal_params = [eat(:IDENTIFIER)]
+
+    while @current_token.type == :COMMA
+      eat(:COMMA)
+      formal_params.append(eat(:IDENTIFIER))
+    end
+
+    eat(:COLON)
+
+    type = type_spec
+
+    formal_params.map do |identifier|
+      ParameterNode.new(identifier, type)
+    end
   end
 
   def variable_declaration

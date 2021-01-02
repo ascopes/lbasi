@@ -5,12 +5,11 @@ require_relative('visitor')
 
 # Interpreter implementation.
 class Interpreter < Visitor
-  def initialize(tree, symbol_table)
+  def initialize(tree)
     super()
     @tree = tree
     @program_name = nil
     @global_scope = {}
-    @symbol_table = symbol_table
   end
 
   def interpret

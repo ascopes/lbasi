@@ -30,10 +30,17 @@ end
 BlockNode = Dataclass.new(:declarations, :compound_statement)
 
 # Variable definition.
-VariableDeclarationNode = Dataclass.new(:identifier, :type)
+VariableDeclarationNode = Dataclass.new(:identifier, :type) do
+  def name
+    identifier.value.upcase
+  end
+end
 
 # Procedure definition.
-ProcedureDeclarationNode = Dataclass.new(:name, :block)
+ProcedureDeclarationNode = Dataclass.new(:name, :params, :block, :position)
+
+# Parameter definition.
+ParameterNode = Dataclass.new(:name, :type, :position)
 
 # Compound statement (BEGIN ... END block).
 CompoundNode = Dataclass.new(:children)
@@ -45,6 +52,10 @@ AssignmentNode = Dataclass.new(:left, :op, :right)
 TypeNode = Dataclass.new(:token) do
   def name
     token.value.upcase
+  end
+
+  def position
+    token.position
   end
 end
 

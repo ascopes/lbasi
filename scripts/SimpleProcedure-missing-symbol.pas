@@ -33,5 +33,5 @@ BEGIN {P4}
 END;  {P4}
 
 BEGIN {Part12}
-   a := 12;
+   a := P5;
 END.  {Part12}
