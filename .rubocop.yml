@@ -16,3 +16,5 @@ Style/MethodCalledOnDoEndBlock:
   Enabled: true
 Style/TrailingCommaInArguments:
   EnforcedStyleForMultiline: consistent_comma
+Style/RaiseArgs:
+  Enabled: false

@@ -245,7 +245,7 @@ class Parser
 
   # Error if the current token is not one of the given types.
   def taste(*types)
-    raise(PascalParserSyntaxError.new(@current_token, *types)) unless types.include?(@current_token.type)
+    raise PascalParserSyntaxError.new(@current_token, *types) unless types.include?(@current_token.type)
   end
 
   # Taste the current token to see if it is the given type. If it is,

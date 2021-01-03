@@ -34,8 +34,9 @@ class Interpreter < Visitor
       right = visit(node.right)
 
       unless left.is_a?(Integer) && right.is_a?(Integer)
-        raise(PascalTypeError,
-              "Expected integer oprands when performing DIV operation at #{node.op.human_readable_str}",)
+        raise PascalTypeError.new(
+          "Expected integer oprands when performing DIV operation at #{node.op.human_readable_str}",
+        )
       end
 
       left / right
@@ -93,6 +94,6 @@ class Interpreter < Visitor
   def visit_no_op_node(node); end
 
   def panic_about_operator(operator)
-    raise(PascalTypeError, "I don't know how to process operator #{operator}")
+    raise PascalTypeError.new("I don't know how to process operator #{operator}")
   end
 end

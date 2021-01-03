@@ -68,7 +68,7 @@ class Lexer
       end
     end
 
-    raise(PascalLexerSyntaxError.new(next_chunk[0], curr_position))
+    raise PascalLexerSyntaxError.new(next_chunk[0], curr_position)
   end
 
   def step(steps = 1)
@@ -168,12 +168,11 @@ class Lexer
       next_char = get_raw
 
       unless next_char =~ /\d/
-        raise(
-          PascalLexerSyntaxError.new(
-            number + next_char, curr_position,
-            "Unexpected character #{next_char.inspect} found while parsing number",
-          ),
+        raise PascalLexerSyntaxError.new(
+          number + next_char, curr_position,
+          "Unexpected character #{next_char.inspect} found while parsing number",
         )
+
       end
 
       number += buffer_raw_while(/\d/)

@@ -49,7 +49,7 @@ class ScopeSymbolTable
     existing_symbol = @symbols[symbol.name]
 
     unless existing_symbol.nil?
-      raise(PascalDuplicateNameError.new(symbol.name, existing_symbol.defined_at, symbol.defined_at))
+      raise PascalDuplicateNameError.new(symbol.name, existing_symbol.defined_at, symbol.defined_at)
     end
 
     @symbols[symbol.name] = symbol
@@ -61,7 +61,7 @@ class ScopeSymbolTable
 
     if symbol.nil?
       # No match in this scope.
-      raise(PascalMissingNameError.new(name, position)) if @enclosing_scope.nil?
+      raise PascalMissingNameError.new(name, position) if @enclosing_scope.nil?
 
       # If we have an enclosing scope, try to look the symbol up in there.
       @enclosing_scope.lookup(name, position)

@@ -9,7 +9,7 @@ class Visitor
     begin
       visitor_method = method(name)
     rescue NoMethodError
-      raise(NoMethodError, "No method named #{name.inspect} found in #{self} while processing #{node}")
+      raise NoMethodError.new("No method named #{name.inspect} found in #{self} while processing #{node}")
     end
 
     visitor_method.call(node)
